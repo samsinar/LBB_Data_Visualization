@@ -1,0 +1,269 @@
+---
+title: "LBB Data Visualization"
+author: "Samsinar Ilyas"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Data Explanation 
+
+Dataset on Amazon's Top 50 bestselling books from 2009 to 2019. Contains 550 books, data has been categorized into fiction and non-fiction using Goodreads
+
+FEATURES:
+
+- Name - Name of the Book
+- Author - The author of the Book
+- User Rating - Amazon User Rating
+- Reviews - Number of written reviews on amazon
+- Price - The price of the book (As at 13/10/2020)
+- Year - The Year(s) it ranked on the bestseller
+- Genre - Whether fiction or non-fiction
+
+# 2. Input Data
+
+At first, enable the library to use
+```{r}
+library(ggplot2)
+library(ggthemes)
+theme_algoritma <- readRDS("theme_algoritma.rds")
+```
+
+Read the data, make sure the data is in the sama place with R project.
+```{r}
+books <- read.csv("bestsellers with categories.csv")
+head(books)
+```
+
+# 3. Data Mining
+
+### Check for Missing Value
+```{r}
+anyNA(books)
+```
+### Check the type of data, change data type which is not appropriate
+```{r}
+str(books)
+```
+
+change the type date of `year` and `Genre`
+```{r}
+books$Year <- as.factor(books$Year)
+books$Genre <- as.factor(books$Genre)
+```
+
+**Now, Data already to analysis!**
+
+
+# 4. Exploratory Data Analysis and Data Visualization
+
+### Check the summary of data
+```{r}
+summary(books)
+```
+
+## Comparison of Reviews by Genre 
+
+```{r}
+
+
+ggplot(books, aes(x = Year,
+                        y = Reviews,
+                        fill = Genre)
+       ) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Set1") +
+  
+  labs(title = "Comparison of Reviews by Genre",
+       subtitle = "From 2009-2019",
+       caption = "Dataset: Kaggle",
+       x = "Year",
+       y = "Reviews",
+       color = "Genre" 
+       ) +
+  theme_algoritma
+
+```
+
+## Correlation of User Reviews and Ratings
+
+```{r}
+ggplot(books,
+       aes(
+         x = User.Rating,
+         y = Reviews,
+         size = Reviews,
+         color = Genre,
+         alpha = User.Rating
+       ))+
+  geom_point()+
+  scale_color_brewer(palette = "Dark2")+
+  
+  labs(title = "Correlation of User Reviews and Ratings",
+       subtitle = "Based on Genre",
+       caption = "Dataset: Kaggle",
+       x = "Reviews",
+       y = "Ratings",
+       color = "Genre",
+       size = "Reviews",
+       alpha = "Rating"
+       ) +
+  guides(size = F)+
+  guides(alpha = F)+
+  theme_algoritma
+```
+
+## The Most Reviewed Books Each Year
+
+```{r}
+#TOP BOOK BY REVIEW EVERY YEAR
+top_book_review_year <- books[order(books$Reviews, decreasing = TRUE),]
+top_book_review_year <- top_book_review_year[ match(x = unique(top_book_review_year$Year), table = top_book_review_year$Year), ]
+```
+
+```{r}
+ggplot(top_book_review_year,
+       aes(
+         x = Year,
+         y = Name,
+       ))+
+  geom_col(fill = "turquoise4")+
+  
+  labs(
+    title = "The Most Reviewed Books Each Year",
+    x = "",
+    y = "")+
+  
+  theme_algoritma
+```
+
+## Top 10 Book Based on Reviews
+
+```{r}
+top_book_review <- books[order(books$Reviews, decreasing = TRUE),]
+top_book_review <- top_book_review[ match(x = unique(top_book_review$Name), table = top_book_review$Name), ]
+top_book_review <- head(top_book_review, 10)
+```
+
+```{r}
+ggplot(top_book_review,
+       aes(
+         x = Reviews,
+         y = reorder(Name, Reviews),
+       ))+
+  geom_col(fill = "turquoise4")+
+  
+  labs(
+    title = "Top 10 Book Based on Reviews",
+    x = "",
+    y = "")+
+  
+  theme_algoritma
+```
+
+## Top 10 Book Based on Ratings
+
+```{r}
+#TOP BOOK BY RATING
+top_book_rating <- books[order(books$User.Rating, decreasing = TRUE),]
+top_book_rating <- top_book_rating[ match(x = unique(top_book_rating$Name), table = top_book_rating$Name), ]
+top_book_rating <- head(top_book_rating, 10)
+```
+
+```{r}
+ggplot(top_book_rating,
+       aes(
+         x = User.Rating,
+         y = reorder(Name, User.Rating),
+       ))+
+  geom_col(fill = "turquoise4")+
+  
+  labs(
+    title = "Top 10 Book Based on Ratings",
+    x = "",
+    y = "")+
+  
+  theme_algoritma
+```
+
+
+## Top 10 Author Based on Reviews
+
+```{r}
+top_author <- books[order(books$Reviews, decreasing = TRUE),]
+top_author <- top_author[ match(x = unique(top_author$Author), table = top_author$Author), ]
+top_author <- head(top_author, 10)
+```
+
+```{r}
+ggplot(top_author,
+       aes(
+         x = Reviews,
+         y = reorder(Author, Reviews),
+       ))+
+  geom_col(fill = "turquoise4")+
+  
+  labs(
+    title = "Top 10 Author Based on Reviews",
+    x = "",
+    y = "")+
+  
+  theme_algoritma
+```
+
+## Top 10 Author Based on Ratings
+
+```{r}
+top_author1 <- books[order(books$User.Rating, decreasing = TRUE),]
+top_author1 <- top_author1[ match(x = unique(top_author1$Author), table = top_author1$Author), ]
+top_author1 <- head(top_author1, 10)
+```
+
+
+```{r}
+ggplot(top_author1,
+       aes(
+         x = User.Rating,
+         y = reorder(Author, User.Rating),
+       ))+
+  geom_col(fill = "turquoise4")+
+  
+  labs(
+    title = "Top 10 Author Based on Ratings",
+    x = "",
+    y = "")+
+  
+  theme_algoritma
+```
+
+
+## Histogram of Prices
+
+```{r}
+ggplot(books,
+  aes(
+    x = Price)
+  )+
+  
+  geom_histogram(fill = "turquoise4")+
+  
+  labs(title = "Histogram of Prices")+
+  
+  theme_algoritma
+
+```
+
+
+
+
+
